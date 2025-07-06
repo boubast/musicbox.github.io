@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
 
 /* ---------- CONFIG ---------- */
-let currentMusic='music1';
+// Détecter la musique active depuis l'URL ou l'état de navigation
+let currentMusic = 'music1';
+const activeNavItem = document.querySelector('.nav-item.active');
+if (activeNavItem) {
+  currentMusic = activeNavItem.dataset.music;
+}
+
 const FILES=[ "Bass_1.wav","Bass_2.wav","Bass_3.wav","Bass_4.wav","Bass_5.wav",
               "Drum_1.wav","Drum_2.wav","Drum_3.wav","Drum_4.wav","Drum_5.wav",
               "Melo_1.wav","Melo_2.wav","Melo_3.wav","Melo_4.wav","Melo_5.wav" ];
@@ -30,15 +36,29 @@ themeBtn.onclick=()=>root.classList.toggle('light');
 navItems.forEach(item=>{
   item.onclick=()=>{
     if(item.classList.contains('disabled')) return;
-    navItems.forEach(n=>n.classList.remove('active'));
-    item.classList.add('active');
-    currentMusic=item.dataset.music;
+    const newMusic=item.dataset.music;
+    if(newMusic!==currentMusic){
+      // Stocker la sélection avant de recharger
+      sessionStorage.setItem('selectedMusic', newMusic);
+      location.reload();
+    }
   };
 });
+
+// Restaurer la sélection après rechargement
+const savedMusic = sessionStorage.getItem('selectedMusic');
+if (savedMusic) {
+  currentMusic = savedMusic;
+  navItems.forEach(n=>n.classList.remove('active'));
+  const targetItem = document.querySelector(`[data-music="${savedMusic}"]`);
+  if (targetItem) targetItem.classList.add('active');
+  sessionStorage.removeItem('selectedMusic');
+}
 
 /* ---------- Global vars ---------- */
 let ctx,buffers={},tracks=[],meter,current={},longest=0;
 let recorder,recordedBlob,isRecording=false;
+let meloCounter=0; // Pour Music 2
 
 /* ---------- Show ready state ---------- */
 loader.remove(); playBtn.disabled=false; playBtn.textContent='▶ Start';
@@ -134,11 +154,39 @@ playBtn.onclick=async()=>{
   /* Pad toggle */
   function toggle(t){
     const cat=t.cat,now=Tone.now();
+    
+    // Règles spéciales pour Music 2 (2 melo max)
+    if(currentMusic==='music2' && cat==='melo'){
+      const trackKey='melo_'+t.file;
+      const activeMelos=Object.keys(current).filter(key=>key.startsWith('melo_')).length;
+      
+      if(current[trackKey]){
+        // Désactiver ce pad
+        t.gain.gain.linearRampTo(0,.05,now);
+        t.pad.classList.remove('active');
+        delete current[trackKey];
+      }else if(activeMelos<2){
+        // Activer ce pad si moins de 2 melos actifs
+        t.gain.gain.linearRampTo(1,.05,now);
+        t.pad.classList.add('active');
+        current[trackKey]=t;
+      }
+      return;
+    }
+    
+    // Règles normales pour les autres catégories
     if(current[cat]===t){
-      t.gain.gain.linearRampTo(0,.05,now);t.pad.classList.remove('active');current[cat]=null;
+      t.gain.gain.linearRampTo(0,.05,now);
+      t.pad.classList.remove('active');
+      current[cat]=null;
     }else{
-      if(current[cat]){current[cat].gain.gain.linearRampTo(0,.05,now);current[cat].pad.classList.remove('active');}
-      t.gain.gain.linearRampTo(1,.05,now);t.pad.classList.add('active');current[cat]=t;
+      if(current[cat]){
+        current[cat].gain.gain.linearRampTo(0,.05,now);
+        current[cat].pad.classList.remove('active');
+      }
+      t.gain.gain.linearRampTo(1,.05,now);
+      t.pad.classList.add('active');
+      current[cat]=t;
     }
   }
   tracks.forEach(t=>t.pad.onclick=()=>toggle(t));
@@ -176,13 +224,14 @@ playBtn.onclick=async()=>{
   
   // Fonction pour désactiver tous les pads
   function stopAllPads(){
-    Object.values(current).forEach(t=>{
-      if(t){
+    tracks.forEach(t=>{
+      if(t.pad.classList.contains('active')){
         t.gain.gain.linearRampTo(0,.05,Tone.now());
         t.pad.classList.remove('active');
       }
     });
     current={};
+    meloCounter=0;
   }
   
   recordBtn.onclick=async()=>{
