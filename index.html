@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>MusicBox</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.min.js"></script>
+</head>
+<body>
+  <!-- HUD cycle -->
+  <div id="cycleHUD"></div>
+
+  <!-- Loader -->
+  <div id="loader" class="overlay">
+    <div id="loadRing" class="loadRing"></div>
+    <p id="loadTxt">Chargement… 0 %</p>
+  </div>
+
+  <!-- Theme toggle -->
+  <button id="themeBtn" class="themeBtn" title="Basculer thème">
+    <svg id="themeIcon" width="34" height="34" viewBox="0 0 34 34"
+        stroke="var(--accent)" stroke-width="2" stroke-linecap="round" fill="none">
+
+      <!-- SOLEIL -->
+      <g id="sun">
+        <circle cx="17" cy="17" r="6"/>
+        <line x1="17" y1="3"  x2="17" y2="7"/>
+        <line x1="17" y1="31" x2="17" y2="27"/>
+        <line x1="3"  y1="17" x2="7"  y2="17"/>
+        <line x1="31" y1="17" x2="27" y2="17"/>
+        <line x1="6"  y1="6"  x2="9"  y2="9"/>
+        <line x1="28" y1="28" x2="25" y2="25"/>
+        <line x1="6"  y1="28" x2="9"  y2="25"/>
+        <line x1="28" y1="6"  x2="25" y2="9"/>
+      </g>
+
+      <!-- CROISSANT : épaisseur régulière -->
+      <g id="moon">
+        <path  d="
+          M26 17
+          A9 9 0 1 1 17 8
+          A7 7 0 1 0 26 17
+          Z"
+          fill="var(--accent)" stroke="none"/>
+      </g>
+    </svg>
+  </button>
+
+
+  <!-- Overlay START -->
+  <div id="startOverlay" class="overlay">
+    <button id="playBtn" class="bigBtn" disabled>Chargement…</button>
+  </div>
+
+  <h1 class="hero">Music<span>Box</span></h1>
+  <p>Clique pour activer / désactiver un pad par catégorie.</p>
+
+  <div id="categories"></div>
+
+  <!-- Master volume -->
+  <section class="master">
+    <h2 class="masterTitle">Master</h2>
+    <input id="masterVol" type="range" min="-60" max="0" value="-6" step="1">
+  </section>
+
+  <script defer src="script.js"></script>
+</body>
+</html>

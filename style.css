@@ -1,0 +1,223 @@
+/* ───────────────────  VARIABLES  ─────────────────── */
+:root{
+  /* couleurs sombre par défaut */
+  --bg1:#1b2430; --bg2:#323f52;
+  --font:#eef2ff;
+
+  --glass:rgba(255,255,255,0.08);
+  --stroke:rgba(255,255,255,0.15);
+
+  --accent:#00c6ff; --accent2:#0072ff;
+
+  /* layout */
+  --pad:120px;      /* desktop par défaut */
+  --gap:4rem;       /* idem */
+  --hudSize:72px; --hudThick:10px;
+  --glow:12px;      /* halo pads actifs */
+}
+
+/* tablette / mobile : tailles adaptées */
+@media (max-width:1023px){ :root{ --pad:100px; --gap:2.5rem } }
+@media (max-width:767px) { :root{ --pad:78px;  --gap:1.2rem } }
+
+/* thème clair (html.light) */
+html.light{
+  --bg1:#eef3ff; --bg2:#d9e2f5;
+  --font:#1b2430;
+  --glass:rgba(0,0,0,.06); --stroke:rgba(0,0,0,.14);
+  --accent:#0066ff; --accent2:#0095ff;
+}
+
+/* ───────────────────  RESET / BASE  ─────────────────── */
+*{margin:0;box-sizing:border-box}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:var(--font);
+  font-family:'Poppins',sans-serif;
+  text-align:center;
+  padding:2.3rem 1rem 2rem;
+  transition:background .4s;
+}
+
+.hero{
+  font-size:2.4rem;font-weight:600;
+  margin-bottom:.35rem;letter-spacing:.5px;
+}
+.hero span{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;color:transparent;
+}
+p{opacity:.85;margin-bottom:2rem}
+
+/* ───────────────  HUD cycle  ─────────────── */
+#cycleHUD{
+  position:fixed;top:1rem;right:1rem;
+  width:var(--hudSize);height:var(--hudSize);
+  background:conic-gradient(var(--accent) 0deg,transparent 0deg);
+  border-radius:50%;
+  mask:radial-gradient(farthest-side,transparent calc(100% - var(--hudThick)),#000 calc(100% - var(--hudThick)));
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--hudThick)),#000 calc(100% - var(--hudThick)));
+  box-shadow:0 0 8px rgba(0,0,0,.6),inset 0 0 4px rgba(0,0,0,.65),0 0 6px 2px var(--accent);
+  pointer-events:none;opacity:.95;
+}
+
+/* ───────────────  Loader  ─────────────── */
+.loadRing{
+  --size:100px;--thick:12px;
+  width:var(--size);height:var(--size);margin-bottom:1rem;
+  border-radius:50%;
+  border:var(--thick) solid transparent;
+  border-top:var(--thick) solid var(--accent);
+  animation:spin 1.1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loadTxt{font-size:1rem}
+
+/* ───────────────  Bouton thème  ─────────────── */
+.themeBtn{
+  position:fixed;bottom:1rem;right:1rem;z-index:1000;
+  width:56px;height:56px;border-radius:50%;
+  border:2px solid var(--stroke);
+  background:var(--glass);
+  backdrop-filter:blur(12px) saturate(1.2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  box-shadow:0 0 10px rgba(0,0,0,.35);
+  transition:transform .25s;
+}
+.themeBtn:hover{transform:scale(1.08)}
+.themeBtn:active{transform:scale(.92)}
+
+/* glow pulsant */
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 12px var(--accent)}
+  50%   {box-shadow:0 0 20px var(--accent)}
+}
+.themeBtn{animation:glowPulse 3s ease-in-out infinite}
+
+/* rotation douce du SVG quand on change de thème */
+#themeIcon{transition:transform .6s ease}
+
+/* mode clair : on pivote l’icône, on masque le soleil, on montre la lune */
+html.light #themeIcon{transform:rotate(180deg)}
+html.light #sun  {opacity:0}
+html.light #moon{opacity:1}
+
+/* mode sombre (défaut) : soleil visible, lune masquée */
+#sun  {opacity:1}
+#moon {opacity:0}
+
+/* pour que le croissant garde l’orientation “pointe à droite”,
+   on le contre-pivote à –180 ° quand le bouton tourne de 180 ° */
+#moon{transform-origin:50% 50%}
+html.light #moon{transform:rotate(-180deg)}
+/* ───────────────  Catégories & pads  ─────────────── */
+#categories{
+  display:flex;flex-direction:column;
+  gap:2.3rem;max-width:1100px;margin:0 auto;
+}
+
+.category{
+  display:flex;flex-direction:column;align-items:center;
+  gap:.9rem;width:100%;
+}
+
+.catTitle{
+  font:600 1.1rem/1 'Poppins',sans-serif;
+  letter-spacing:.45px;text-transform:capitalize;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;color:transparent;
+}
+
+/* rangées flex centrées */
+.pads{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:var(--gap);width:100%;
+}
+
+.pad{
+  width:var(--pad);height:var(--pad);
+  border-radius:26px;
+  background:var(--glass);
+  border:2px solid var(--stroke);
+  backdrop-filter:blur(10px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:transform .15s ease,box-shadow .25s,border-color .25s;
+}
+.pad:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(0,0,0,.25)}
+.pad.active{
+  border-color:var(--accent);
+  animation:pop .32s ease,outPulse 1.2s ease-in-out infinite;
+}
+@keyframes pop{0%{transform:scale(.95)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes outPulse{
+  0%,100%{box-shadow:0 0 var(--glow) var(--accent)}
+  50%   {box-shadow:0 0 calc(var(--glow)*1.7) var(--accent)}
+}
+
+.pad .emoji{font-size:2rem}
+.pad .emoji svg{
+  width:32px;height:32px;    /* ou 28px si tu préfères */
+}
+.pad .lab{font-size:.7rem;margin-top:.3rem;opacity:.9}
+
+/* audio-réactif (JS définit --lvl) */
+.pad.active{--glow:clamp(8px,12px*var(--lvl,1),30px)}
+
+/* ───────────────  Master volume  ─────────────── */
+.master{
+  margin-top:3rem;
+  display:flex;flex-direction:column;align-items:center;gap:1rem;
+}
+.masterTitle{
+  font:600 1.2rem 'Poppins',sans-serif;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;color:transparent;
+}
+#masterVol{
+  -webkit-appearance:none;width:260px;height:12px;border-radius:6px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  cursor:pointer;outline:none;
+  box-shadow:0 0 6px rgba(0,0,0,.5),inset 0 0 4px rgba(0,0,0,.7);
+  transition:filter .2s;
+}
+#masterVol:hover{filter:brightness(1.1)}
+#masterVol::-webkit-slider-thumb{
+  -webkit-appearance:none;height:24px;width:24px;border-radius:50%;
+  background:#fff;border:3px solid var(--accent);box-shadow:0 0 8px var(--accent);
+  transition:transform .15s;
+}
+#masterVol:active::-webkit-slider-thumb{transform:scale(.85)}
+#masterVol::-moz-range-thumb{
+  height:22px;width:22px;border:none;border-radius:50%;background:#fff;box-shadow:0 0 8px var(--accent);
+}
+
+/* ───────────────  Overlay général  ─────────────── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;
+  backdrop-filter:blur(4px);z-index:999;
+}
+.bigBtn{
+  font:600 1.8rem 'Poppins',sans-serif;
+  padding:1rem 3rem;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;cursor:pointer;transition:transform .15s;
+}
+.bigBtn:active{transform:scale(.96)}
+.bigBtn[disabled]{opacity:.5;cursor:default}
+
+/* ───────────────  Responsive ajustements  ─────────────── */
+@media (max-width:1023px){
+  :root{--hudSize:60px;--hudThick:9px}
+}
+@media (max-width:767px){
+  :root{--hudSize:52px;--hudThick:8px}
+  .hero{font-size:1.8rem}
+  p{font-size:.9rem;margin-bottom:1.4rem}
+  #masterVol{width:180px}
+  .themeBtn{bottom:.7rem;right:.7rem}
+}
