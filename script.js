@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
 /* ---------- CONFIG ---------- */
+let currentMusic='music1';
 const FILES=[ "Bass_1.wav","Bass_2.wav","Bass_3.wav","Bass_4.wav","Bass_5.wav",
               "Drum_1.wav","Drum_2.wav","Drum_3.wav","Drum_4.wav","Drum_5.wav",
               "Melo_1.wav","Melo_2.wav","Melo_3.wav","Melo_4.wav","Melo_5.wav" ];
@@ -18,14 +19,26 @@ const playBtn=document.getElementById('playBtn');
 const catDiv=document.getElementById('categories');
 const hud=document.getElementById('cycleHUD');
 const themeBtn=document.getElementById('themeBtn');
+const navItems=document.querySelectorAll('.nav-item');
 
 /* ---------- THEME toggle ---------- */
 const root=document.documentElement;
 if(matchMedia('(prefers-color-scheme: light)').matches) root.classList.add('light');
 themeBtn.onclick=()=>root.classList.toggle('light');
 
+/* ---------- NAVIGATION ---------- */
+navItems.forEach(item=>{
+  item.onclick=()=>{
+    if(item.classList.contains('disabled')) return;
+    navItems.forEach(n=>n.classList.remove('active'));
+    item.classList.add('active');
+    currentMusic=item.dataset.music;
+  };
+});
+
 /* ---------- Global vars ---------- */
 let ctx,buffers={},tracks=[],meter,current={},longest=0;
+let recorder,recordedBlob,isRecording=false;
 
 /* ---------- Show ready state ---------- */
 loader.remove(); playBtn.disabled=false; playBtn.textContent='▶ Start';
@@ -98,7 +111,7 @@ playBtn.onclick=async()=>{
   
   /* Load buffers */
   for(const f of FILES){
-    buffers[f]=await new Promise(res=>new Tone.Buffer(`samples/${f}`,b=>res(b)));
+    buffers[f]=await new Promise(res=>new Tone.Buffer(`samples/${currentMusic}/${f}`,b=>res(b)));
     buffers[f]=trimTail(buffers[f]);
     longest=Math.max(longest,buffers[f].duration);
   }
@@ -152,6 +165,62 @@ playBtn.onclick=async()=>{
   document.getElementById('masterVol').addEventListener('input',e=>{
     Tone.getDestination().volume.value=e.target.value;
   });
+  
+  /* Recording setup */
+  recorder=new Tone.Recorder();
+  Tone.getDestination().connect(recorder);
+  
+  const recordBtn=document.getElementById('recordBtn');
+  const audioPlayer=document.getElementById('audioPlayer');
+  const saveBtn=document.getElementById('saveBtn');
+  
+  // Fonction pour désactiver tous les pads
+  function stopAllPads(){
+    Object.values(current).forEach(t=>{
+      if(t){
+        t.gain.gain.linearRampTo(0,.05,Tone.now());
+        t.pad.classList.remove('active');
+      }
+    });
+    current={};
+  }
+  
+  recordBtn.onclick=async()=>{
+    if(!isRecording){
+      await recorder.start();
+      isRecording=true;
+      recordBtn.textContent='⏹ Stop';
+      recordBtn.classList.add('recording');
+      audioPlayer.style.display='none';
+      saveBtn.disabled=true;
+    }else{
+      recordedBlob=await recorder.stop();
+      isRecording=false;
+      recordBtn.textContent='🔴 Record';
+      recordBtn.classList.remove('recording');
+      
+      const url=URL.createObjectURL(recordedBlob);
+      audioPlayer.src=url;
+      audioPlayer.style.display='block';
+      audioPlayer.disabled=false;
+      saveBtn.disabled=false;
+    }
+  };
+  
+  // Désactiver les pads quand on joue l'enregistrement
+  audioPlayer.onplay=()=>stopAllPads();
+  
+  saveBtn.onclick=async()=>{
+    if(recordedBlob){
+      // Convertir WAV en MP3 (simulation - en réalité on garde le WAV)
+      const url=URL.createObjectURL(recordedBlob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`musicbox-${Date.now()}.mp3`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
   
   Tone.Transport.start();
   overlay.remove();

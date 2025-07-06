@@ -51,6 +51,83 @@ body{
 }
 p{opacity:.85;margin-bottom:2rem}
 
+/* ───────────────  Navigation Menu  ─────────────── */
+.nav-menu{
+  display:flex;justify-content:center;gap:1.5rem;
+  margin-bottom:2rem;padding:1rem;
+  background:var(--glass);
+  backdrop-filter:blur(15px) saturate(1.3);
+  border:1px solid var(--stroke);
+  border-radius:20px;
+  max-width:400px;margin:0 auto 2rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+}
+
+.nav-item{
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;
+  padding:1rem 1.5rem;border-radius:16px;
+  cursor:pointer;transition:all .3s ease;
+  background:transparent;
+  border:2px solid transparent;
+}
+
+.nav-item:hover:not(.disabled):not(.active){
+  background:var(--glass);
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,.2);
+}
+
+.nav-item.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;
+  box-shadow:0 8px 25px var(--accent);
+  animation:navGlow 2s ease-in-out infinite;
+}
+
+.nav-item.disabled{
+  opacity:.4;cursor:not-allowed;
+}
+
+.nav-icon{
+  width:1.8rem;height:1.8rem;margin-bottom:.3rem;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));
+}
+
+.nav-icon svg{
+  width:100%;height:100%;
+}
+
+.nav-item span{
+  font:600 .9rem 'Poppins',sans-serif;
+  letter-spacing:.3px;
+}
+
+.coming-soon{
+  position:absolute;top:-8px;right:-8px;
+  background:var(--accent);color:#fff;
+  font-size:.6rem;padding:.2rem .5rem;
+  border-radius:8px;font-weight:600;
+  animation:pulse 2s infinite;
+}
+
+@keyframes navGlow{
+  0%,100%{box-shadow:0 8px 25px var(--accent)}
+  50%{box-shadow:0 12px 35px var(--accent)}
+}
+
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.1)}
+}
+
+@media (max-width:767px){
+  .nav-menu{gap:1rem;padding:.8rem}
+  .nav-item{padding:.8rem 1rem}
+  .nav-icon{font-size:1.5rem}
+  .nav-item span{font-size:.8rem}
+}
+
 /* ───────────────  HUD cycle  ─────────────── */
 #cycleHUD{
   position:fixed;top:1rem;right:1rem;
@@ -193,6 +270,58 @@ html.light #moon{transform:rotate(-180deg)}
 #masterVol:active::-webkit-slider-thumb{transform:scale(.85)}
 #masterVol::-moz-range-thumb{
   height:22px;width:22px;border:none;border-radius:50%;background:#fff;box-shadow:0 0 8px var(--accent);
+}
+
+/* ───────────────  Recording section  ─────────────── */
+.recording{
+  margin-top:2rem;
+  display:flex;flex-direction:column;align-items:center;gap:1rem;
+}
+.recordTitle{
+  font:600 1.2rem 'Poppins',sans-serif;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;color:transparent;
+}
+.record-controls{
+  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;align-items:center;
+}
+#audioPlayer{
+  background:var(--glass);border:1px solid var(--stroke);
+  border-radius:8px;padding:.5rem;
+}
+#audioPlayer::-webkit-media-controls-panel{
+  background:var(--glass);
+}
+.record-btn,.play-btn,.save-btn{
+  font:600 .9rem 'Poppins',sans-serif;
+  padding:.8rem 1.5rem;border:none;border-radius:12px;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.record-btn{
+  background:linear-gradient(135deg,#ff4757,#ff3742);
+  color:#fff;
+}
+.record-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(255,71,87,.4)}
+.record-btn.recording{
+  animation:recordPulse 1s infinite;
+}
+
+.save-btn{
+  background:linear-gradient(135deg,#2ed573,#1dd1a1);
+  color:#fff;
+}
+.save-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 16px rgba(46,213,115,.4)}
+.record-btn:disabled,.save-btn:disabled{
+  opacity:.5;cursor:not-allowed;transform:none;
+}
+@keyframes recordPulse{
+  0%,100%{box-shadow:0 4px 12px rgba(255,71,87,.4)}
+  50%{box-shadow:0 4px 20px rgba(255,71,87,.8)}
+}
+@media (max-width:767px){
+  .record-controls{gap:.8rem}
+  .record-btn,.save-btn{padding:.7rem 1.2rem;font-size:.8rem}
 }
 
 /* ───────────────  Overlay général  ─────────────── */
